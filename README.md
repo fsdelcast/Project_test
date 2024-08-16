@@ -2,6 +2,17 @@ EDA
 ================
 2023-11-27
 
+#### Table of Contents
+- [import data](#import-data)
+- [Data preparation: Merge all data by day](#data-preparation--merge-all-data-by-day)
+  * [Aggregate weather data by county and by day](#aggregate-weather-data-by-county-and-by-day)
+- [which month is the coldest and hottest?](#which-month-is-the-coldest-and-hottest-)
+- [Does any variable is dependent on the temperature?](#does-any-variable-is-dependent-on-the-temperature-)
+- [Does any variable is dependent on the house size?](#does-any-variable-is-dependent-on-the-house-size-)
+
+<small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
+
+
 ``` r
 library (tinytex)
 ```

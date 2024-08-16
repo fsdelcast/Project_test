@@ -1,0 +1,104 @@
+---
+title: "EDA"
+output: github_document
+date: "2023-11-27"
+---
+
+```{r}
+library (tinytex)
+```
+
+
+# import data
+```{r}
+library (arrow)
+library (tidyverse)
+parquet_file <- "C:/Users/fsdel/Documents/2. Learning & Knowledge/1. Data Analytics/Data Science - Masters/Courses/Fall 23/IDS/Final Project/Cleaned Files/Energy Data divided by day by category.parquet"
+df_house <- read_parquet(parquet_file)
+
+
+file_path <- "C:/Users/fsdel/Documents/2. Learning & Knowledge/1. Data Analytics/Data Science - Masters/Courses/Fall 23/IDS/Final Project/Cleaned Files/Weather Data Cleaned.csv"
+df_weather <- read_csv(file_path)
+
+file_path <- "C:/Users/fsdel/Documents/2. Learning & Knowledge/1. Data Analytics/Data Science - Masters/Courses/Fall 23/IDS/Final Project/Cleaned Files/Static House Data Cleaned.csv"
+df_static <- read_csv (file_path)
+
+
+parquet_file <- "C:/Users/fsdel/Documents/2. Learning & Knowledge/1. Data Analytics/Data Science - Masters/Courses/Fall 23/IDS/Final Project/Cleaned Files/Energy Data divided by month by category.parquet"
+df_house_by_month<-read_parquet(parquet_file)
+```
+
+# Data preparation: Merge all data by day
+
+## Aggregate weather data by county and by day
+
+```{r}
+df_weather_mean_by_day<- df_weather %>%
+  group_by(county, date_time = lubridate::floor_date(date_time, "day")) %>%
+  summarise (mean_temp = mean (Dry.Bulb.Temperature...C.))
+```
+
+
+
+
+# which month is the coldest and hottest?
+
+```{r}
+# ----
+# Which month is the hottest
+  # Create a line chart to view which is the hottest month but is not clear if june
+  # or july
+ggplot(df_weather)+ 
+  aes(x=date_time, y=Dry.Bulb.Temperature...C.) +
+  xlab("Time of year")+
+  ylab ("Weather Temperature")+
+  geom_point()+
+  ggtitle("Temperature by month")
+  # doing an agreggation to determine which is the hottest month. We can see that
+  # july is the month with the highest min temperature and max temperature compared 
+  # to june. The coldest month is January.
+df_weather %>%
+  group_by(month) %>% 
+  summarise(mean = mean (Dry.Bulb.Temperature...C.),
+            min = min (Dry.Bulb.Temperature...C.),
+            max = max (Dry.Bulb.Temperature...C.),
+            median = median (Dry.Bulb.Temperature...C.))
+```
+
+
+
+# Does any variable is dependent on the temperature?
+Explore correlations with temperature:
+Some variables are correlated with the temperature like AC or heating but others are not
+
+```{r}
+parquet_file <- "C:/Users/fsdel/Documents/2. Learning & Knowledge/1. Data Analytics/Data Science - Masters/Courses/Fall 23/IDS/Final Project/EDA/All data merged by day.parquet"
+
+df_merge<-read_parquet(parquet_file)
+
+# code to create a graph and see the correlation between two variables
+df_merge %>% ggplot () + aes (x= in.sqft, y=total_consumption) +geom_point() + geom_smooth(method="lm", se=TRUE)
+
+# Identify numeric columns
+num_cols <- sapply(df_merge, is.numeric)
+
+sum (num_cols)
+
+# DO the correlation matrix for temperature
+
+cor_matrix_temp <- cor (df_merge[, num_cols],df_merge$mean_temp)
+cor_matrix_temp
+```
+
+# Does any variable is dependent on the house size?
+Explore correlation with SQFT
+Some variables are correlated with the SQFT like plug or light but others are not
+
+```{r}
+# DO the correlation matrix for sqft
+cor_matrix_sqt <- cor (df_merge[, num_cols],df_merge$in.sqft)
+
+cor_matrix_sqt
+```
+
+
